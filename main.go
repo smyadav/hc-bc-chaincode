@@ -13,12 +13,12 @@ type Chaincode struct {
 
 // Flight record containing Asset details, etc
 // summary:
-// 
+//
 type FlightRecord struct {
-	ObjectType    string           `json:"objType"`
-	Assets        []asset             `json:"Assets,omitempty"`        // list of prescriptions that the patient has currently
-	TailNumber    string   		 `json:"tailNumber,omitempty"`     // current insurance
-	
+	ObjectType string  `json:"objType"`
+	Assets     []Asset `json:"Assets,omitempty"`     // list of prescriptions that the patient has currently
+	TailNumber string  `json:"tailNumber,omitempty"` // current insurance
+
 }
 
 // Main
@@ -50,8 +50,8 @@ func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.insertAsset(stub, args)
 	} else if function == "getAssets" {
 		// TESTED OK
-		return t.getAssets(stub, args)
-	} 
+		return t.getAssetForFlight(stub, args)
+	}
 
 	fmt.Println("invoke did not find func: " + function) //error
 	return shim.Error("Received unknown function invocation")
