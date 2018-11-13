@@ -11,21 +11,14 @@ import (
 type Chaincode struct {
 }
 
-// EMR medical record containing PII, heart rate, blood pressure, etc
+// Flight record containing Asset details, etc
 // summary:
-// store patients record, heart rate data and insurance information
-type EMR struct {
+// 
+type FlightRecord struct {
 	ObjectType    string           `json:"objType"`
-	PatientID     string           `json:"id"`                      // patient id must be in the format of "p###"
-	FirstName     string           `json:"firstName"`               // will be lowercase
-	LastName      string           `json:"lastName"`                // will be lowercas
-	DOB           string           `json:"dob"`                     // format of MM/DD/YYYY
-	Address       string           `json:"address"`                 // format is street address city, state, zip
-	Phone         string           `json:"phone"`                   // format is ###-###-####
-	HeartRate     heartRateMessage `json:"heartRate,omitempty"`     // current heart rate message
-	RxList        []rx             `json:"rxList,omitempty"`        // list of prescriptions that the patient has currently
-	Insurance     insurance        `json:"insurance,omitempty"`     // current insurance
-	BloodPressure bloodPressure    `json:"bloodPressure,omitempty"` // current blood pressure
+	Assets        []asset             `json:"Assets,omitempty"`        // list of prescriptions that the patient has currently
+	TailNumber    string   		 `json:"tailNumber,omitempty"`     // current insurance
+	
 }
 
 // Main
@@ -39,10 +32,10 @@ func main() {
 // Init initializes chaincode
 func (t *Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 
-	response := t.initPerson(stub, []string{"p01", "john", "doe", "01/01/2000", "111 address city, state, zip", "111-111-1111"})
-	fmt.Println(response.GetMessage())
-	response = t.initPerson(stub, []string{"p02", "mary", "jane", "01/01/2000", "111 address city, state, zip", "111-111-1111"})
-	fmt.Println(response.GetMessage())
+	//response := t.initPerson(stub, []string{"p01", "john", "doe", "01/01/2000", "111 address city, state, zip", "111-111-1111"})
+	//fmt.Println(response.GetMessage())
+	//response = t.initPerson(stub, []string{"p02", "mary", "jane", "01/01/2000", "111 address city, state, zip", "111-111-1111"})
+	//fmt.Println(response.GetMessage())
 	return shim.Success(nil)
 }
 
@@ -52,50 +45,13 @@ func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("invoke is running " + function)
 
 	// Handle different functions
-	if function == "insertRx" {
+	if function == "insertAsset" {
 		// TESTED OK
-		return t.insertRx(stub, args)
-	} else if function == "getRxForPatient" {
+		return t.insertAsset(stub, args)
+	} else if function == "getAssets" {
 		// TESTED OK
-		return t.getRxForPatient(stub, args)
-	} else if function == "fillRx" {
-		// TESTED OK
-		return t.fillRx(stub, args)
-	} else if function == "approveRx" {
-		// TESTED OK
-		return t.approveRx(stub, args)
-	} else if function == "getRxHistoryOfPatient" {
-		// TESTED OK
-		return t.getRxHistoryOfPatient(stub, args)
-	} else if function == "newHeartRateMessage" {
-		// TESTED OK
-		return t.newHeartRateMessage(stub, args) // insert new heart rate message to blockchain
-	} else if function == "getHeartRateHistory" {
-		// TESTED OK
-		return t.getHeartRateHistory(stub, args) // get history of heart rate data for a given patient
-	} else if function == "getPerson" {
-		// TESTED OK
-		return t.getPerson(stub, args)
-	} else if function == "getPeople" {
-		// TESTED OK
-		return t.getPeople(stub, args)
-	} else if function == "getInsurance" {
-		// TESTED OK
-		return t.getInsurance(stub, args)
-	} else if function == "insertInsurance" {
-		// TESTED OK
-		return t.insertInsurance(stub, args)
-	} else if function == "newBloodPressure" {
-		// TESTED OK
-		return t.newBloodPressure(stub, args)
-	} else if function == "getBloodPressureHistory" {
-		// TESTED OK
-		return t.getBloodPressureHistory(stub, args)
-	} else if function == "isHacked" {
-		return t.isHacked(stub, args)
-	} else if function == "hack" {
-		return t.hack(stub, args)
-	}
+		return t.getAssets(stub, args)
+	} 
 
 	fmt.Println("invoke did not find func: " + function) //error
 	return shim.Error("Received unknown function invocation")
