@@ -32,10 +32,10 @@ func main() {
 // Init initializes chaincode
 func (t *Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 
-	//response := t.initPerson(stub, []string{"p01", "john", "doe", "01/01/2000", "111 address city, state, zip", "111-111-1111"})
-	//fmt.Println(response.GetMessage())
-	//response = t.initPerson(stub, []string{"p02", "mary", "jane", "01/01/2000", "111 address city, state, zip", "111-111-1111"})
-	//fmt.Println(response.GetMessage())
+	response := t.initFlightRecord(stub, []string{"TailNumber1"})
+	fmt.Println(response.GetMessage())
+	response = t.initFlightRecord(stub, []string{"TailNumber2"})
+	fmt.Println(response.GetMessage())
 	return shim.Success(nil)
 }
 

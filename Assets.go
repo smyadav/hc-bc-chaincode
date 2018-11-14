@@ -61,7 +61,7 @@ func (t *Chaincode) insertAsset(stub shim.ChaincodeStubInterface, args []string)
 	// retrieve flight record as bytes
 	FlightRecordAsBytes, err := stub.GetState(TailNumber)
 	if err != nil {
-		return shim.Error(err.Error())
+		return shim.Error("(PS)Tail Number is missing: " + err.Error())
 	}
 
 	// return error if the patient record does not exist
@@ -111,8 +111,8 @@ func (t *Chaincode) insertAsset(stub shim.ChaincodeStubInterface, args []string)
 
 // get Asset with approved attribute
 func (t *Chaincode) getAssetForFlight(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	//	0
-	// "TailNumber"
+	//	0			1
+	// "TailNumber", "AssetID"
 
 	if len(args) < 2 {
 		return shim.Error("Expecting 2 arguements")
@@ -166,4 +166,25 @@ func (t *Chaincode) getAssetForFlight(stub shim.ChaincodeStubInterface, args []s
 
 	// return results
 	return shim.Success(responseAsBytes)
+}
+
+func (t *Chaincode) initFlightRecord(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	TailNumber := args[0]
+
+	newFlightRecord := FlightRecord{
+		ObjectType: "record",
+		TailNumber: TailNumber,
+	}
+
+	FlightRecordAsBytes, err := json.Marshal(newFlightRecord)
+	if err != nil {
+		return shim.Error("Unbale to marshal flight record:" + err.Error())
+	}
+
+	err = stub.PutState(TailNumber, FlightRecordAsBytes)
+	if err != nil {
+		return shim.Error("Error putting state in to ledger: " + err.Error())
+	}
+
+	return shim.Success(nil)
 }
