@@ -109,6 +109,106 @@ func (t *Chaincode) insertAsset(stub shim.ChaincodeStubInterface, args []string)
 	return shim.Success(nil)
 }
 
+
+// initPrescription: Update an Asset
+func (t *Chaincode) updateAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	//   0       		1      2     	3		   4
+	// "TailNumber", "AssetID", Manufacturer, "OnWarranty", "Status"
+	if len(args) < 5 {
+		return shim.Error("Incorrect number of arguments. Expecting 5")
+	}
+
+	// ==== Input sanitation ====
+	fmt.Println("- start init updateAsset")
+	if len(args[0]) <= 0 {
+		return shim.Error("1st argument must be a non-empty string")
+	}
+	if len(args[1]) <= 0 {
+		return shim.Error("2nd argument must be a non-empty string")
+	}
+	if len(args[2]) <= 0 {
+		return shim.Error("3rd argument must be a non-empty string")
+	}
+	if len(args[3]) <= 0 {
+		return shim.Error("4th argument must be a non empty boolean")
+	}
+	if len(args[4]) <= 0 {
+		return shim.Error("5th argument must be a non-empty string")
+	}
+
+	TailNumber := args[0]
+	AssetID := args[1]
+
+	Manufacturer := args[2]
+	OnWarranty, err := strconv.ParseBool(args[3])
+
+	if err != nil {
+		return shim.Error("3rd arguement must be non empty boolean")
+	}
+
+	Status := args[4]
+
+	// get flight Record
+	FlightRecord := FlightRecord{}
+
+	// retrieve flight record as bytes
+	FlightRecordAsBytes, err := stub.GetState(TailNumber)
+	if err != nil {
+		return shim.Error("(PS)Tail Number is missing: " + err.Error())
+	}
+
+	// return error if the flight record does not exist
+	if FlightRecordAsBytes == nil {
+		return shim.Error("Flight Record does not exist: " + err.Error())
+	}
+
+	// convert flight record as bytes to struct
+	if err := json.Unmarshal(FlightRecordAsBytes, &FlightRecord); err != nil {
+		return shim.Error(err.Error())
+	}
+
+	newAsset := Asset{
+		AssetID:      AssetID,
+		Manufacturer: Manufacturer,
+		OnWarranty:   OnWarranty,
+		Status:       Status,
+	}
+
+	// see if AssetID already exists in Flight record, update the parameters
+	for key, tempAsset := range FlightRecord.Assets {
+		if tempAsset.AssetID == newAsset.AssetID {
+			fmt.Printf("AssetID already exists: " + tempAsset.AssetID)
+
+			//patientRecord.RxList[key].Pharmacist = pharmacist
+
+			FlightRecord.Assets[key].Manufacturer = Manufacturer
+			FlightRecord.Assets[key].OnWarranty = OnWarranty
+			FlightRecord.Assets[key].Status = Status		
+		}
+	}
+
+
+	// convert record to JSON bytes
+	FlightRecordAsBytes, err = json.Marshal(FlightRecord)
+	if err != nil {
+		return shim.Error("Error attempting to marshal Asset: " + err.Error())
+	}
+	fmt.Printf("Asset as json bytes: %s", string(FlightRecordAsBytes))
+
+	// put record to state ledger
+	err = stub.PutState(FlightRecord.TailNumber, FlightRecordAsBytes)
+	if err != nil {
+		return shim.Error("Error putting Asset to ledger: " + err.Error())
+	}
+	fmt.Printf("Entered state")
+
+	fmt.Println("- end insertObject (success)")
+	return shim.Success(nil)
+}
+
+
+
+
 // get Asset with approved attribute
 func (t *Chaincode) getAssetForFlight(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	//	0			1
