@@ -48,12 +48,14 @@ func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	if function == "insertAsset" {
 		// TESTED OK
 		return t.insertAsset(stub, args)
-	} else if function == "getAssets" {
+	} else if function == "getAssetForFlight" {
 		// TESTED OK
 		return t.getAssetForFlight(stub, args)
-	} else if function == "insertFlightRecord"{
+	} else if function == "initFlightRecord" {
 		// TESTED OK
 		return t.initFlightRecord(stub, args)
+	} else if function == "updateAsset" {
+		return t.updateAsset(stub, args)
 	}
 
 	fmt.Println("invoke did not find func: " + function) //error
