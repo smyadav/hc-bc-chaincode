@@ -183,7 +183,7 @@ func (t *Chaincode) updateAsset(stub shim.ChaincodeStubInterface, args []string)
 
 			FlightRecord.Assets[key].Manufacturer = Manufacturer
 			FlightRecord.Assets[key].OnWarranty = OnWarranty
-			FlightRecord.Assets[key].Status = Status		
+			FlightRecord.Assets[key].Status = Status
 		}
 	}
 
@@ -267,7 +267,46 @@ func (t *Chaincode) getAssetForFlight(stub shim.ChaincodeStubInterface, args []s
 	// return results
 	return shim.Success(responseAsBytes)
 }
+// get flight record with approved attribute
+func (t *Chaincode) getFlightRecord(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	//	0
+	// "TailNumber"
 
+	if len(args) < 1 {
+		return shim.Error("Expecting 1 arguement")
+	}
+
+	if len(args[0]) <= 0 {
+		return shim.Error("1st arguement must be a non empty string")
+	}
+
+	TailNumber := args[0]
+
+	// create empty flight FlightRecord interface
+	FlightRecord := FlightRecord{}
+
+	// get current state of the given Flight record
+	FlightRecordAsBytes, err := stub.GetState(TailNumber)
+	if err != nil {
+		return shim.Error("Unable to get record: " + err.Error())
+	}
+
+	// convert patient record as bytes to struct
+	if err := json.Unmarshal(FlightRecordAsBytes, &FlightRecord); err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// create custom struct for response of list of prescriptions for a given patient
+
+	// convert reponse to bytes
+	responseAsBytes, err := json.Marshal(FlightRecord)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// return results
+	return shim.Success(responseAsBytes)
+}
 func (t *Chaincode) initFlightRecord(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	TailNumber := args[0]
 
